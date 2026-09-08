@@ -36,7 +36,7 @@ This dataset supports the analysis of:
 ## Case Study
 
 ### Objective
-Equitable incomes for recent graduates are essential for inclusive labor markets and educational planning. This dataset provides information on post-graduation median incomes in Canada, allowing us to examine how factors like gender, ehtnicity, education type, and field of study intersect and impact incomes. 
+Equitable incomes for recent graduates are essential for inclusive labor markets and educational planning. This dataset provides information on post-graduation median incomes in Canada, allowing us to examine how factors like gender, ethnicity, education type, and field of study intersect and impact incomes. 
 
 To explore these dynamics, we focus on several key questions: 
 
@@ -148,9 +148,14 @@ Markdown(income_data.head().to_markdown())
 
 #### 2. Exploratory Data Analysis
 
+Before performing statistical inquiries or predictive modelling, it's helpful to perform exploratory data analysis to gain an understanding of how income varies by demographic and educational factors. 
+
+**Median Income by Gender**
+
+This visualization examines how median income varies by gender. 
+
 ::: {.panel-tabset}
 ## R
-**Median Income by Gender**
 ```{r eda_1_r}
 
 ggplot(income_data, aes(
@@ -179,108 +184,7 @@ ggplot(income_data, aes(
 
 ```
 
-**Median Income by Population Group**
-
-```{r eda_2_r}
-#| fig-width: 8
-#| fig-height: 6
-
-ggplot(income_data, aes(
-  y = fct_reorder(population_group, median_income, .fun = median, .na_rm = TRUE), 
-  x = median_income)) +
-  stat_halfeye(aes(weight = number_graduates), 
-               adjust = 1.5, 
-               justification = -0.1, 
-               .width = 0, 
-               point_colour = NA, 
-               alpha = 0.6,
-               fill = "darkgreen") +
-  geom_boxplot(aes(weight = number_graduates), 
-               width = 0.15, 
-               outlier.shape = NA, 
-               alpha = 0.7, 
-               color = "black") +
-  scale_x_continuous(labels = scales::dollar_format()) +
-  labs(
-    title = "Median Income Distribution by Population Group",
-    subtitle = "Ordered by Median Income",
-    y = "Population Group",
-    x = "Median Income ($)"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(legend.position = "none", panel.grid.minor = element_blank())
-
-```
-
-**Median Income by Level of Study**
-```{r eda_3_r}
-#| fig-width: 8
-#| fig-height: 6
-
-ggplot(income_data, aes(
-  y = fct_reorder(educational_qualification, median_income, .fun = median, .na_rm = TRUE), 
-  x = median_income)) +
-  stat_halfeye(aes(weight = number_graduates), 
-               adjust = 1.5, 
-               justification = -0.1, 
-               .width = 0, 
-               point_colour = NA, 
-               alpha = 0.6,
-               fill = "darkgreen") +
-  geom_boxplot(aes(weight = number_graduates), 
-               width = 0.15, 
-               outlier.shape = NA, 
-               alpha = 0.7, 
-               color = "black") +
-  scale_x_continuous(labels = scales::dollar_format()) +
-  scale_y_discrete(labels = scales::label_wrap(width = 35)) +
-  labs(
-    title = "Median Income Distribution by Educational Qualification",
-    subtitle = "Ordered by Median Income",
-    y = "Educational Qualification",
-    x = "Median Income ($)"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(legend.position = "none", panel.grid.minor = element_blank())
-
-```
-
-**Median Income by Field of Study**
-```{r eda_4_r}
-#| fig-width: 8
-#| fig-height: 6
-
-ggplot(income_data, aes(
-  y = fct_reorder(field_of_study, median_income, .fun = median, .na_rm = TRUE), 
-  x = median_income)) +
-  stat_halfeye(aes(weight = number_graduates), 
-               adjust = 1.5, 
-               justification = -0.1, 
-               .width = 0, 
-               point_colour = NA, 
-               alpha = 0.6,
-               fill = "darkgreen") +
-  geom_boxplot(aes(weight = number_graduates), 
-               width = 0.15, 
-               outlier.shape = NA, 
-               alpha = 0.7, 
-               color = "black") +
-  scale_x_continuous(labels = scales::dollar_format()) +
-  scale_y_discrete(labels = scales::label_wrap(width = 35)) +
-  labs(
-    title = "Median Income Distribution by Field of Study",
-    subtitle = "Ordered by Median Income",
-    y = "Field of Study",
-    x = "Median Income ($)"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(legend.position = "none", panel.grid.minor = element_blank())
-
-```
-
 ## Python
-
-**Median Income by Gender**
 ```{python eda_1_py}
 
 # Expand the dataframe based on 'number_graduates' weight 
@@ -292,11 +196,13 @@ expanded_data = income_data.loc[
 sns.set_theme(style="whitegrid")
 fig, ax = plt.subplots(figsize=(8, 5))
 
+
 # Draw the half-eye / distribution and boxplot components using the expanded data
 sns.violinplot(
     data=expanded_data,
     x="median_income",
     y="gender",
+    order=["Woman", "Man"],
     split=True,
     color="darkgreen",
     inner="box",
@@ -322,8 +228,48 @@ plt.tight_layout()
 plt.show()
 
 ```
+:::
+
+We can see that the income distribution for men has a higher median value, and is less right-skewed than the distribution for women. This suggests that in our dataset, more men are making higher incomes than women. 
+
 **Median Income by Population Group**
 
+This visualization investigates the income distributions by population group, a proxy for ethnicity. 
+
+::: {.panel-tabset}
+## R
+```{r eda_2_r}
+#| fig-width: 8
+#| fig-height: 6
+
+ggplot(income_data, aes(
+  y = fct_rev(fct_reorder(population_group, median_income, .fun = median, .na_rm = TRUE)), 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  labs(
+    title = "Median Income Distribution by Population Group",
+    subtitle = "Ordered by Median Income",
+    y = "Population Group",
+    x = "Median Income ($)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+
+## Python
 ```{python eda_2_py}
 
 # Set up the visual style
@@ -374,7 +320,49 @@ plt.show()
 
 ```
 
+:::
+
+We can see that there are some differences by population groups in our visualization. Notably, "Visible minority, n.i.e.", which stands for "not included elsewhere", aka minority groups that don't fall into one of the major categories, has the lowest median income. Similar groups with low median incomes include "Latin American", "Black", and "Multiple visible minorities". The groups with higher median incomes include "Japanese", "Chinese", and "Korean". 
+
 **Median Income by Educational Qualification**
+
+This visualization investigates the impact of the type of educational qualification or degree on the income distribution of graduates. 
+
+::: {.panel-tabset}
+## R
+```{r eda_3_r}
+#| fig-width: 8
+#| fig-height: 6
+
+ggplot(income_data, aes(
+  y = fct_rev(fct_reorder(educational_qualification, median_income, .fun = median, .na_rm = TRUE)), 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  scale_y_discrete(labels = scales::label_wrap(width = 35)) +
+  labs(
+    title = "Median Income Distribution by Educational Qualification",
+    subtitle = "Ordered by Median Income",
+    y = "Educational Qualification",
+    x = "Median Income ($)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+
+## Python
 ```{python eda_3_py}
 
 # Set up the visual style
@@ -429,7 +417,49 @@ plt.show()
 
 ```
 
+:::
+
+We can see that, as is expected, the more advanced educational qualifications appear to have higher median incomes, such as professional degrees or doctoral degrees. 
+
 **Median Income by Field of Study**
+
+This visualization investigates income distributions by different fields of study. 
+
+::: {.panel-tabset}
+## R
+```{r eda_4_r}
+#| fig-width: 8
+#| fig-height: 6
+
+ggplot(income_data, aes(
+  y = fct_rev(fct_reorder(field_of_study, median_income, .fun = median, .na_rm = TRUE)), 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  scale_y_discrete(labels = scales::label_wrap(width = 35)) +
+  labs(
+    title = "Median Income Distribution by Field of Study",
+    subtitle = "Ordered by Median Income",
+    y = "Field of Study",
+    x = "Median Income ($)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+
+## Python
 ```{python eda_4_py}
 
 # Set up the visual style
@@ -483,7 +513,11 @@ plt.tight_layout()
 plt.show()
 
 ```
+
 :::
+
+We can see that the fields with the lowest median incomes are visual and performing arts, humanities, and transportation services, while the fields with the highest median incomes include math and computer sciences, health fields, and education. 
+
 
 #### 3. Hypothesis Testing
 
